@@ -4,8 +4,8 @@ from pathlib import Path
 
 from fastapi.routing import APIRoute
 
-from app.security import require_signed_request
 from app.main import app
+from app.security import require_signed_request
 
 OPEN_PATHS = {"/healthz"}                      # liveness probe only: returns a constant, touches nothing
 APP_DIR = Path(__file__).resolve().parents[1] / "app"

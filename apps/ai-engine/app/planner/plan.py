@@ -111,7 +111,9 @@ class Ctx:
         self.roots, self.apps, self.hosts = roots, [a for a in (apps or []) if a.strip()], [h.lower().strip(".") for h in (hosts or []) if h.strip()]
 
     def app_ok(self, name: str) -> bool:
-        n = lambda x: x.replace("\\", "/").rsplit("/", 1)[-1].lower().removesuffix(".exe")
+        def n(x: str) -> str:
+            return x.replace("\\", "/").rsplit("/", 1)[-1].lower().removesuffix(".exe")
+
         return n(name) in {n(a) for a in self.apps}
 
     def url_ok(self, url: Any, where: str) -> None:

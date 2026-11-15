@@ -1,7 +1,6 @@
 """Phase 3 acceptance: natural-language goal -> planner (mock model) -> validated plan -> the REAL desktop-agent engine -> an Excel report from a local sample CSV.
 The model reply is a fixed fixture, so this proves the plumbing, validation and execution; it does NOT prove that a real model plans this well."""
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -13,7 +12,7 @@ openpyxl = pytest.importorskip("openpyxl")
 
 from jarvis_agent import docs, stop, taskengine  # noqa: E402
 from jarvis_agent.config import ALL_KINDS, Config  # noqa: E402
-from jarvis_agent.taskengine import Approvals, Audit, Engine  # noqa: E402
+from jarvis_agent.taskengine import Engine  # noqa: E402
 
 from tests.test_planner import llm, post, req  # noqa: E402,F401
 

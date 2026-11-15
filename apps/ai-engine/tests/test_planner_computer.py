@@ -4,7 +4,14 @@ import json
 
 import pytest
 
-from app.planner.plan import DEFAULT_KINDS, KINDS, PlanInvalid, build_messages, review, validate_plan
+from app.planner.plan import (
+    DEFAULT_KINDS,
+    KINDS,
+    PlanInvalid,
+    build_messages,
+    review,
+    validate_plan,
+)
 from tests.test_planner import PATH, ROOTS, W, llm, post, req  # noqa: F401
 
 ALL = set(KINDS)

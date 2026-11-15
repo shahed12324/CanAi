@@ -157,7 +157,7 @@ def test_office_file_to_pdf():
     shutil = pytest.importorskip("shutil")
     if not (shutil.which("soffice") or shutil.which("libreoffice")):
         pytest.skip("LibreOffice not installed")
-    data, mime, _ = ops.run("doc_to_pdf", [("note.txt", "Hello report".encode())], {})
+    data, mime, _ = ops.run("doc_to_pdf", [("note.txt", b"Hello report")], {})
     assert PdfReader(io.BytesIO(data)).pages
     with pytest.raises(ops.ToolError):
         ops.run("doc_to_pdf", [("x.exe", b"MZ")], {})

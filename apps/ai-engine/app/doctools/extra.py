@@ -16,8 +16,7 @@ from typing import Any
 import pypdfium2 as pdfium
 from docx import Document
 from openpyxl import Workbook
-from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageOps
-from pypdf import PdfReader
+from PIL import Image, ImageDraw, ImageFilter, ImageOps
 
 from app.doctools import ops
 from app.doctools.ops import ToolError, hex_color, mm
@@ -86,7 +85,7 @@ def _lang(p: dict[str, Any]) -> str:
 def ocr_text(files: Files, p: dict[str, Any]) -> str:
     name, data = files[0]
     out = []
-    for i, im in enumerate(_pages(name, data), 1):
+    for _i, im in enumerate(_pages(name, data), 1):
         t = _ocr_one(im, _lang(p)).strip()
         out.append(t)
     text = "\n\n".join(out).strip()

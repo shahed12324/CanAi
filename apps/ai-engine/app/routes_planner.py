@@ -8,7 +8,16 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from app.planner.plan import DEFAULT_KINDS, KINDS, MAX_GOAL, PlanInvalid, build_messages, extract_json, review, validate_plan
+from app.planner.plan import (
+    DEFAULT_KINDS,
+    KINDS,
+    MAX_GOAL,
+    PlanInvalid,
+    build_messages,
+    extract_json,
+    review,
+    validate_plan,
+)
 from app.providers.base import ChatMessage, ChatRequest, ProviderError, ProviderSpec, check_model
 from app.routes_providers import _adapter, _err
 from app.security import AuthContext, require_signed_request
@@ -39,7 +48,7 @@ async def make_plan(body: PlanRequest, _: Annotated[AuthContext, Depends(require
     adapter = _adapter(body.provider)
     feedback: str | None = None
     tokens_in = tokens_out = 0
-    for attempt in range(2):
+    for _attempt in range(2):
         msgs = [ChatMessage(**m) for m in build_messages(body.goal, roots, allowed, feedback, body.apps, body.hosts)]
         try:
             r = await adapter.complete(ChatRequest(model=model, messages=msgs, max_tokens=3000, temperature=0))

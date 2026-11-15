@@ -6,11 +6,11 @@ from fastapi.responses import JSONResponse
 
 from app.routes_bills import router as bills_router
 from app.routes_docs import router as docs_router
+from app.routes_doctools import router as doctools_router
 from app.routes_leads import router as leads_router
 from app.routes_office import router as office_router
 from app.routes_planner import router as planner_router
 from app.routes_providers import router as providers_router
-from app.routes_doctools import router as doctools_router
 from app.routes_seo import router as seo_router
 from app.routes_studio import router as studio_router
 from app.routes_video import router as video_router

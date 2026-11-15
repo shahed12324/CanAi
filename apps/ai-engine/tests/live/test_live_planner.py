@@ -15,7 +15,7 @@ from pathlib import Path
 import httpx
 import pytest
 
-from app.planner.plan import KINDS, PlanInvalid, build_messages, extract_json, validate_plan
+from app.planner.plan import PlanInvalid, build_messages, extract_json, validate_plan
 
 ON = os.environ.get("JARVIS_LIVE_MODEL") == "1" and os.environ.get("JARVIS_LIVE_API_KEY") and os.environ.get("JARVIS_LIVE_MODEL_NAME")
 pytestmark = [pytest.mark.live_model, pytest.mark.skipif(not ON, reason="set JARVIS_LIVE_MODEL=1, JARVIS_LIVE_API_KEY, JARVIS_LIVE_MODEL_NAME to call a real model")]
