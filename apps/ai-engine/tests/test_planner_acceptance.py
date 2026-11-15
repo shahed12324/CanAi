@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 AGENT = Path(__file__).resolve().parents[2] / "pc-agent"
-sys.path.insert(0, str(AGENT))
+sys.path.append(str(AGENT))   # at the END: the agent also has a tests/ folder that must not shadow this one
 openpyxl = pytest.importorskip("openpyxl")
 
 from jarvis_agent import docs, stop, taskengine  # noqa: E402
