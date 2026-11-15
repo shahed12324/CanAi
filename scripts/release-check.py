@@ -62,6 +62,7 @@ def check(tag: str | None = None) -> list[str]:
         wf = yaml.safe_load(read(".github/workflows/desktop-release.yml"))
     except ImportError:
         wf = None
+        bad.append("PyYAML is not installed, so the workflow permissions cannot be checked (pip install pyyaml)")
     text = read(".github/workflows/desktop-release.yml")
     if wf is not None:
         if wf.get("permissions") != {"contents": "read"}:
