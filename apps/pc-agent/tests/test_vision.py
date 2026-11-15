@@ -20,6 +20,13 @@ def _font_path():
 FONT = _font_path()
 
 
+def _make_font(size):
+    try:
+        return ImageFont.truetype(FONT, size)
+    except OSError:                                    # no common font on this OS (e.g. macOS runner): Pillow's built-in scalable font
+        return ImageFont.load_default(size=size)
+
+
 def _png(im):
     b = io.BytesIO()
     im.save(b, "PNG")
@@ -35,7 +42,7 @@ class Screen(devices.Backends):
         self.buttons = buttons if buttons is not None else {"Save": (150, 400, 330, 460), "Cancel": (400, 400, 600, 460)}      # absolute screen boxes
         im = Image.new("RGB", (vs[2], vs[3]), (255, 255, 255))
         d = ImageDraw.Draw(im)
-        f = ImageFont.truetype(FONT, 28)
+        f = _make_font(28)
         l, t = win_rect[0] - vs[0], win_rect[1] - vs[1]
         d.text((l + 40, t + 30), "Quarterly report draft", fill=(0, 0, 0), font=f)
         y = t + 90
@@ -168,7 +175,7 @@ def test_dark_button_with_light_text_and_outlined_button_both_read():
     be = Screen(buttons={"Save": (150, 400, 330, 460)})
     d = ImageDraw.Draw(be.canvas)
     d.rectangle((400, 400, 600, 460), fill=(20, 40, 120))
-    d.text((420, 412), "Submit", fill=(255, 255, 255), font=ImageFont.truetype(FONT, 28))
+    d.text((420, 412), "Submit", fill=(255, 255, 255), font=_make_font(28))
     devices.set_backends(be)
     ob = vision.capture(cfg())
     assert vision.find(ob, "Submit") and vision.find(ob, "Save")
