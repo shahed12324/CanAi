@@ -38,18 +38,23 @@ jobs:
 
   web:
     # Active once apps/web exists (after scripts/bootstrap-web.sh is run and committed).
-    if: ${{ hashFiles('apps/web/artisan') != '' }}
     runs-on: ubuntu-24.04
-    defaults: {run: {working-directory: apps/web}}
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
+      - name: Is there a Laravel app to check?
+        id: has
+        run: if [ -f apps/web/artisan ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "ok=false" >> "$GITHUB_OUTPUT"; echo "apps/web/artisan not found - skipping"; fi
+      - if: steps.has.outputs.ok == 'true'
+        uses: shivammathur/setup-php@v2
         with: {php-version: "8.4", extensions: "pdo_pgsql, redis, intl, mbstring, bcmath, gd, zip"}
-      - run: composer install --no-interaction --prefer-dist
-      - run: cp .env.example .env && php artisan key:generate
-      - run: ./vendor/bin/pint --test
-      - run: ./vendor/bin/phpstan analyse --memory-limit=512M
-      - run: ./vendor/bin/pest
+      - if: steps.has.outputs.ok == 'true'
+        working-directory: apps/web
+        run: |
+          composer install --no-interaction --prefer-dist
+          cp .env.example .env && php artisan key:generate
+          ./vendor/bin/pint --test
+          ./vendor/bin/phpstan analyse --memory-limit=512M
+          ./vendor/bin/pest
 
   mobile:
     # Expo app: type check, API-client tests, and a real Android bundle (proves every screen compiles).
