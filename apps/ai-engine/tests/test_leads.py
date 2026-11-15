@@ -389,7 +389,9 @@ async def test_playwright_renders_js_site():
         pytest.skip(f"chromium unavailable: {e}")
     finally:
         srv.shutdown()
-    assert html and "js@fixture.test" in html
+    if html is None:
+        pytest.skip("playwright or chromium is not installed here")
+    assert "js@fixture.test" in html
 
 
 async def test_playwright_refuses_private_subrequests():

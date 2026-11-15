@@ -400,7 +400,10 @@ def pdf_compress(data: bytes, level: str = "medium") -> bytes:
         w = PdfWriter(clone_from=r)
         for p in w.pages:
             p.compress_content_streams()
-        w.compress_identical_objects(remove_identicals=True, remove_orphans=True)
+        try:
+            w.compress_identical_objects(remove_duplicates=True, remove_orphans=True)       # pypdf >= 6
+        except TypeError:
+            w.compress_identical_objects(remove_identicals=True, remove_orphans=True)       # older pypdf
         return _bytes(w)
     if level not in ("medium", "high"):
         raise ToolError("Level must be low, medium or high.")
