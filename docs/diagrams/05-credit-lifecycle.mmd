@@ -1,0 +1,17 @@
+stateDiagram-v2
+    [*] --> Reserved: reserve(estimate, idempotency_key)
+    Reserved --> Settled: success, actual usage known
+    Reserved --> Released: provider failed (eligible refund)
+    Reserved --> Expired: no settle within TTL (sweeper job)
+    Settled --> [*]
+    Released --> [*]
+    Expired --> [*]
+
+    note right of Reserved
+        ledger row: type=reservation (negative available)
+        wallet.available decreases, wallet.balance unchanged
+    end note
+    note right of Settled
+        ledger rows: reservation_release + debit(actual)
+        all inside one DB transaction with SELECT ... FOR UPDATE on wallet
+    end note

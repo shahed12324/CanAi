@@ -1,0 +1,13 @@
+DROP FUNCTION IF EXISTS mobile_revoke_token(char, bigint);
+DROP FUNCTION IF EXISTS mobile_emergency(char, char, boolean, text);
+DROP FUNCTION IF EXISTS mobile_decide(char, char, text, char, text);
+DROP FUNCTION IF EXISTS mobile_approvals(integer);
+DROP FUNCTION IF EXISTS mobile_stepup_active(char, char);
+DROP FUNCTION IF EXISTS mobile_pin_attempt(char, char, boolean);
+DROP FUNCTION IF EXISTS mobile_set_pin(char, char, text);
+DROP FUNCTION IF EXISTS mobile_device_guard(char, char);
+DROP FUNCTION IF EXISTS emergency_active(char);
+DROP TABLE IF EXISTS emergency_events;
+DROP FUNCTION IF EXISTS emergency_events_immutable();
+DROP TABLE IF EXISTS inbox_notifications;
+DROP TABLE IF EXISTS mobile_devices;

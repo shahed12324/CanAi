@@ -1,0 +1,11 @@
+{
+  "name": "jarvis-one",
+  "version": "1.0.0",
+  "description": "JARVIS ONE public API client (no dependencies)",
+  "type": "module",
+  "main": "jarvis-one.mjs",
+  "engines": { "node": ">=18" },
+  "scripts": { "test": "node --test test/sdk.test.mjs" },
+  "license": "UNLICENSED",
+  "private": true
+}

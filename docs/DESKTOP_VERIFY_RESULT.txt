@@ -1,0 +1,13 @@
+[PASS] agent unit/integration (pytest) :: 512 passed, 8 skipped in 106.99s (0:01:46)
+[PASS] release consistency (versions, CSP, workflow safety) :: release check OK: version 1.0.0 consistent everywhere
+[PASS] voice+character logic (node) :: # duration_ms 87.978297
+[PASS] window e2e in headless Chrome :: 74 checks OK
+[PASS] window e2e vs OLD server :: 56 checks OK
+[PASS] voice e2e (fake mic, stubbed speech) :: 27 checks OK
+[PASS] database rules (PostgreSQL pc_* + rotation + migration files) :: 169 passed, 1747 deselected in 11.52s
+[PASS] Tauri shell (cargo test --offline) :: test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+[PASS] planner (ai-engine, mock model) :: 82 passed in 0.42s
+[PASS] phone app (Expo): vitest + tsc :: tsc-ok
+[PASS] PHP mini-runner: reply style + approval alert + push :: all 0 failed
+
+ALL EXECUTED CHECKS PASSED (skipped ones are listed above)

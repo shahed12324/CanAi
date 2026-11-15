@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "The shell itself needs no powers. The page it shows is served by the local agent on 127.0.0.1 and is NOT granted any Tauri API.",
+  "windows": ["main"],
+  "permissions": []
+}

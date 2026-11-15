@@ -1,0 +1,7 @@
+{$DOMAIN} {
+	encode gzip
+	# SSE chat streams must not be buffered
+	reverse_proxy nginx:80 {
+		flush_interval -1
+	}
+}

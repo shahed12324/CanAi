@@ -1,0 +1,85 @@
+flowchart TB
+    subgraph Clients
+        WEB[Web Browser<br/>Admin / Customer / Public<br/>Blade + Livewire]
+        MOB[Mobile App<br/>Expo + React Native]
+        DESK[Desktop App<br/>Tauri 2 + React]
+        TG[Telegram]
+        WA[WhatsApp Cloud API]
+        META[Messenger / Instagram]
+    end
+
+    subgraph Edge
+        NGX[Nginx<br/>TLS, reverse proxy]
+    end
+
+    subgraph Laravel["Laravel Control Plane (authoritative)"]
+        HTTP[HTTP + Livewire]
+        API[REST API /api/v1]
+        WH[Webhook Ingress]
+        RVB[Reverb WebSocket]
+        HZN[Horizon Queue Workers]
+        SCH[Scheduler]
+        ACC[Accounting Engine]
+    end
+
+    subgraph Python["Python AI Engine (internal only)"]
+        GW[Model Gateway]
+        AG[Agent / Workflow Executor]
+        RAG[RAG + Documents]
+        VV[Voice + Vision]
+        MED[Media Render Worker<br/>FFmpeg]
+        CRW[Crawler<br/>Playwright]
+    end
+
+    subgraph Data
+        PG[(PostgreSQL 18<br/>+ pgvector)]
+        RD[(Redis 8)]
+        S3[(Object Storage)]
+    end
+
+    subgraph External["External Providers"]
+        LLM[LLM APIs<br/>OpenAI, Claude, Gemini,<br/>OpenRouter, Groq]
+        OLL[Ollama<br/>local / self-hosted]
+        PAY[Payments<br/>SSLCommerz, bKash,<br/>Nagad, Stripe]
+        ADS[Meta / Google Ads APIs]
+        MAIL[Gmail / Graph / SMTP]
+        CUR[Couriers<br/>Steadfast, Pathao, RedX]
+        STORE[Stores<br/>Woo, Shopify, Laravel]
+    end
+
+    WEB --> NGX
+    MOB --> NGX
+    DESK --> NGX
+    TG --> NGX
+    WA --> NGX
+    META --> NGX
+    NGX --> HTTP
+    NGX --> API
+    NGX --> WH
+    NGX --> RVB
+
+    HTTP --> PG
+    API --> PG
+    WH --> HZN
+    HZN --> PG
+    HZN --> RD
+    HTTP --> RD
+    SCH --> HZN
+
+    HZN -- signed internal request --> GW
+    API -- signed internal request --> GW
+    GW --> LLM
+    GW --> OLL
+    AG --> GW
+    RAG --> PG
+    MED --> S3
+    CRW --> HZN
+    Python -- signed callback --> API
+
+    HZN --> PAY
+    HZN --> ADS
+    HZN --> MAIL
+    HZN --> CUR
+    HZN --> STORE
+    HTTP --> S3
+    DESK -. local .-> OLL

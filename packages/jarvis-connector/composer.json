@@ -1,0 +1,23 @@
+{
+    "name": "jarvis/connector",
+    "description": "Lets JARVIS ONE read and update products and stock in your own Laravel store, over a signed HTTPS API.",
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^10.0|^11.0|^12.0|^13.0"
+    },
+    "require-dev": {
+        "pestphp/pest": "^3.0"
+    },
+    "autoload": {
+        "psr-4": { "Jarvis\\Connector\\": "src/" }
+    },
+    "autoload-dev": {
+        "psr-4": { "Jarvis\\Connector\\Tests\\": "tests/" }
+    },
+    "extra": {
+        "laravel": { "providers": ["Jarvis\\Connector\\ConnectorServiceProvider"] }
+    },
+    "minimum-stability": "stable"
+}

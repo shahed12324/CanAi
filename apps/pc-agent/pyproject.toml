@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jarvis-agent"
+version = "1.0.0"
+description = "JARVIS ONE computer agent: runs approved jobs on this PC / laptop / VPS inside local rules"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+metrics = ["psutil>=5.9"]
+vision = ["pillow>=10", "numpy>=1.24"]            # screen understanding (also needs the Tesseract program installed)
+browser = ["playwright>=1.40"]                           # browser_run (uses the installed Chrome or Edge; no browser download needed)
+uia = ["uiautomation>=2.0; sys_platform == 'win32'"]   # optional Windows accessibility tree
+dev = ["pytest>=7"]
+
+[project.scripts]
+jarvis-agent = "jarvis_agent.cli:main"
+
+[tool.setuptools]
+packages = ["jarvis_agent"]
+
+[tool.setuptools.package-data]
+jarvis_agent = ["ui/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "real_device: needs a real Windows PC / device; skipped unless JARVIS_REAL_DEVICE=1 (tests/real)",
+  "live_model: calls a real AI model with your key; skipped unless JARVIS_LIVE_MODEL=1",
+  "perf: performance / memory checks with generous limits (simulated, runs everywhere)",
+  "area(n): which of the 20 validation areas (docs/DESKTOP_TEST_REPORT.md) the test belongs to",
+]

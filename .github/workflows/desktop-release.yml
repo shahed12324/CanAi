@@ -1,0 +1,139 @@
+name: desktop-release
+# Builds the Windows installer (NSIS .exe + .msi): the Tauri shell AND the PyInstaller-built agent (no Python needed on the PC).
+#   * by hand:  GitHub -> Actions -> desktop-release -> Run workflow
+#   * by tag:   push a tag like v1.0.0 (it must equal the version in apps/pc-agent/jarvis_agent/__init__.py) -> also creates a DRAFT release with the installers + SHA256SUMS.txt
+# Code signing is OPTIONAL and only happens when these repository secrets exist:  WINDOWS_CERT_PFX_BASE64 (the .pfx file, base64) and WINDOWS_CERT_PASSWORD.
+# Without them the installers are built UNSIGNED (Windows SmartScreen will warn) and the artifact says so in SIGNING-STATUS.txt.
+# NOT RUN by the authors (no Windows machine, no GitHub run) - the first run is the real test; read its log if it fails.
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    env:
+      CERT_B64: ${{ secrets.WINDOWS_CERT_PFX_BASE64 }}
+      CERT_PASS: ${{ secrets.WINDOWS_CERT_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Release consistency check (versions, icons, CSP, no Tauri powers)
+        shell: pwsh
+        run: |
+          python scripts/release-check.py
+          if ($env:GITHUB_REF_TYPE -eq 'tag') { python scripts/release-check.py --tag $env:GITHUB_REF_NAME }
+      - name: Agent tests
+        shell: pwsh
+        run: |
+          python -m pip install --quiet pytest apps/pc-agent
+          python -m pytest apps/pc-agent/tests -q -x --ignore=apps/pc-agent/tests/e2e
+      - name: Build the agent .exe (PyInstaller)
+        shell: pwsh
+        run: |
+          python -m pip install --quiet pyinstaller mss pyautogui psutil apps/pc-agent
+          Set-Location apps/pc-agent
+          python -m PyInstaller --noconfirm --onefile --name jarvis-agent --collect-submodules jarvis_agent --collect-data jarvis_agent packaging/entry.py
+          $env:JARVIS_AGENT_HOME = Join-Path $env:RUNNER_TEMP 'smoke-home'
+          .\dist\jarvis-agent.exe status
+          if ($LASTEXITCODE -ne 0) { throw 'the built agent did not start' }
+          .\dist\jarvis-agent.exe crash-report
+          if ($LASTEXITCODE -ne 0) { throw 'crash-report command failed in the built agent' }
+      - name: Prepare signing (only if the certificate secrets exist)
+        id: sign
+        shell: pwsh
+        run: |
+          if ([string]::IsNullOrEmpty($env:CERT_B64) -or [string]::IsNullOrEmpty($env:CERT_PASS)) {
+            "signed=false" | Out-File -Append $env:GITHUB_OUTPUT
+            "UNSIGNED: no certificate secrets. Windows SmartScreen will warn when this installer is run." | Out-File SIGNING-STATUS.txt
+            exit 0
+          }
+          $pfx = Join-Path $env:RUNNER_TEMP 'cert.pfx'
+          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:CERT_B64))
+          $signtool = (Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" | Sort-Object FullName | Select-Object -Last 1).FullName
+          if (-not $signtool) { throw 'signtool.exe not found on the runner' }
+          "signed=true" | Out-File -Append $env:GITHUB_OUTPUT
+          "SIGNTOOL=$signtool" | Out-File -Append $env:GITHUB_ENV
+          "PFX=$pfx" | Out-File -Append $env:GITHUB_ENV
+          # sign the agent before it is bundled
+          & $signtool sign /f $pfx /p $env:CERT_PASS /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 apps/pc-agent/dist/jarvis-agent.exe
+          if ($LASTEXITCODE -ne 0) { throw 'signing the agent failed' }
+          # tell Tauri to sign its own exe and the installers (signCommand is called with the file as %1)
+          $cmd = "`"$signtool`" sign /f `"$pfx`" /p $($env:CERT_PASS) /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 %1"
+          @{ bundle = @{ windows = @{ signCommand = $cmd } } } | ConvertTo-Json -Depth 5 | Out-File apps/desktop/tauri.sign.conf.json -Encoding utf8
+          "SIGNED with the project certificate." | Out-File SIGNING-STATUS.txt
+      - name: Place the agent as a Tauri sidecar
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force apps/desktop/binaries | Out-Null
+          Copy-Item apps/pc-agent/dist/jarvis-agent.exe apps/desktop/binaries/jarvis-agent-x86_64-pc-windows-msvc.exe
+      - name: Generate icons and build the installers
+        shell: pwsh
+        working-directory: apps/desktop
+        run: |
+          npx --yes @tauri-apps/cli@2 icon icons/icon.png
+          if (Test-Path tauri.sign.conf.json) {
+            npx --yes @tauri-apps/cli@2 build --config tauri.release.conf.json --config tauri.sign.conf.json
+          } else {
+            npx --yes @tauri-apps/cli@2 build --config tauri.release.conf.json
+          }
+      - name: Verify signatures (only when signed)
+        if: steps.sign.outputs.signed == 'true'
+        shell: pwsh
+        run: |
+          Get-ChildItem apps/desktop/target/release/bundle/nsis/*.exe, apps/desktop/target/release/bundle/msi/*.msi | ForEach-Object {
+            & $env:SIGNTOOL verify /pa $_.FullName
+            if ($LASTEXITCODE -ne 0) { throw "bad signature: $($_.Name)" }
+          }
+      - name: Smoke test - silent install, run the installed agent, uninstall
+        shell: pwsh
+        run: |
+          $setup = (Get-ChildItem apps/desktop/target/release/bundle/nsis/*.exe | Select-Object -First 1).FullName
+          $dir = Join-Path $env:RUNNER_TEMP 'canai-smoke'
+          Start-Process -FilePath $setup -ArgumentList '/S', "/D=$dir" -Wait
+          $agent = Get-ChildItem $dir -Recurse -Filter 'jarvis-agent*.exe' | Select-Object -First 1
+          if (-not $agent) { throw 'the installed folder has no agent' }
+          $env:JARVIS_AGENT_HOME = Join-Path $env:RUNNER_TEMP 'smoke-home2'
+          & $agent.FullName status
+          if ($LASTEXITCODE -ne 0) { throw 'the installed agent did not start' }
+          $un = Get-ChildItem $dir -Recurse -Filter 'uninstall*.exe' | Select-Object -First 1
+          if ($un) { Start-Process -FilePath $un.FullName -ArgumentList '/S' -Wait }
+      - name: Checksums
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force out | Out-Null
+          Copy-Item apps/desktop/target/release/bundle/nsis/*.exe, apps/desktop/target/release/bundle/msi/*.msi out/
+          Copy-Item SIGNING-STATUS.txt out/
+          Get-ChildItem out -File | Where-Object { $_.Name -ne 'SIGNING-STATUS.txt' } | ForEach-Object { "$((Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower())  $($_.Name)" } | Out-File out/SHA256SUMS.txt -Encoding ascii
+      - name: Remove the signing material from the runner
+        if: always()
+        shell: pwsh
+        run: |
+          Remove-Item -Force -ErrorAction SilentlyContinue apps/desktop/tauri.sign.conf.json
+          if ($env:PFX) { Remove-Item -Force -ErrorAction SilentlyContinue $env:PFX }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: out/*
+
+  draft-release:
+    if: github.ref_type == 'tag'
+    needs: windows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: windows-installer, path: out }
+      - name: Create a DRAFT release (a person reviews and publishes it)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" out/* --repo "$GITHUB_REPOSITORY" --draft --generate-notes --title "CAN AI Desktop $GITHUB_REF_NAME"

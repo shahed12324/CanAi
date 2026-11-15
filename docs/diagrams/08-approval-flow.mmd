@@ -1,0 +1,12 @@
+flowchart TD
+    A[Action requested<br/>by agent / workflow / user draft] --> R{Risk class}
+    R -- low<br/>read-only, draft --> X[Execute]
+    R -- medium<br/>single email, post schedule,<br/>product draft publish --> M[Approval by user<br/>with permission]
+    R -- high<br/>bulk email, ad launch, budget up,<br/>targeting change, refund, delete,<br/>accounting post, payroll file --> H[Approval + step-up<br/>PIN / biometric / password]
+    R -- critical<br/>spend above tenant limit,<br/>period reopen --> C[Two-person approval<br/>owner + second approver]
+    M --> D{Decision}
+    H --> D
+    C --> D
+    D -- approve --> X
+    D -- reject / expire --> S[Stop + notify + log]
+    X --> L[Audit log<br/>who, what, before/after, channel]

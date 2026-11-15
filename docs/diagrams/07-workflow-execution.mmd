@@ -1,0 +1,30 @@
+sequenceDiagram
+    autonumber
+    participant T as Trigger<br/>(schedule / event / manual)
+    participant L as Laravel
+    participant P as Python Executor
+    participant A as Approval Service
+    participant N as Notify (mobile/Telegram)
+
+    T->>L: start workflow (version pinned)
+    L->>L: check workflow permission, quota, tenant status
+    L->>P: execute(run_id, graph, allowed_tools, budget)
+    loop each node
+        P->>P: run node (AI action / condition / loop)
+        alt tool action
+            P->>L: POST /internal/v1/tools/{tool} (signed)
+            L->>L: permission check for this agent + tenant
+            L-->>P: result or denied
+        end
+        alt approval node or sensitive tool
+            P->>L: request approval
+            L->>A: create workflow_approval (pending)
+            A->>N: push + Telegram buttons
+            N-->>A: approve / reject (PIN/biometric for high risk)
+            A->>L: decision
+            L-->>P: resume or stop
+        end
+        P->>L: node log (status, cost, output ref)
+    end
+    P->>L: run finished (status, total usage)
+    L->>L: settle credits, store run log

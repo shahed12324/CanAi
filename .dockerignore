@@ -1,0 +1,10 @@
+.git
+apps/web
+**/node_modules
+**/.venv
+.env
+**/.env
+.hypothesis
+.pytest_cache
+.ruff_cache
+*.zip

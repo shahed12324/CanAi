@@ -1,0 +1,68 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "JARVIS ONE public API",
+    "version": "1.0.0",
+    "description": "Acts as the key's person in the key's workspace, within the key's scopes. A key can start the person's own enabled workflows; it can never approve a run, delete anything or change a key. 60 requests per minute per key."
+  },
+  "servers": [{"url": "/api/public/v1"}],
+  "security": [{"bearerKey": []}],
+  "components": {
+    "securitySchemes": {"bearerKey": {"type": "http", "scheme": "bearer", "description": "jk_live_ followed by 40 hex characters, made on the Developer page."}},
+    "schemas": {
+      "Error": {"type": "object", "properties": {"error": {"type": "string"}, "message": {"type": "string"}}}
+    },
+    "responses": {
+      "Unauthorized": {"description": "Key missing, wrong, revoked, expired or its owner was removed (never says which).", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
+      "Forbidden": {"description": "The key does not have the scope this call needs.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
+      "TooMany": {"description": "More than 60 requests in a minute for this key."}
+    }
+  },
+  "paths": {
+    "/me": {
+      "get": {
+        "operationId": "me", "summary": "The key's person and workspace", "x-scope": "me",
+        "responses": {"200": {"description": "OK", "content": {"application/json": {"schema": {"type": "object", "properties": {"data": {"type": "object", "properties": {
+          "user": {"type": "object", "properties": {"id": {"type": "string"}, "name": {"type": "string"}}},
+          "workspace": {"type": "object", "properties": {"id": {"type": "string"}, "name": {"type": "string"}}}}}}}}}},
+          "401": {"$ref": "#/components/responses/Unauthorized"}, "403": {"$ref": "#/components/responses/Forbidden"}, "429": {"$ref": "#/components/responses/TooMany"}}
+      }
+    },
+    "/credits": {
+      "get": {
+        "operationId": "credits", "summary": "Credit balance of the workspace", "x-scope": "credits:read",
+        "responses": {"200": {"description": "OK (amounts are decimal strings)", "content": {"application/json": {"schema": {"type": "object", "properties": {"data": {"type": "object", "properties": {
+          "balance": {"type": "string"}, "reserved": {"type": "string"}, "available": {"type": "string"}}}}}}}},
+          "401": {"$ref": "#/components/responses/Unauthorized"}, "403": {"$ref": "#/components/responses/Forbidden"}, "429": {"$ref": "#/components/responses/TooMany"}}
+      }
+    },
+    "/workflows": {
+      "get": {
+        "operationId": "listWorkflows", "summary": "The person's workflows", "x-scope": "workflows:read",
+        "responses": {"200": {"description": "OK", "content": {"application/json": {"schema": {"type": "object", "properties": {"data": {"type": "array", "items": {"type": "object", "properties": {
+          "id": {"type": "string"}, "name": {"type": "string"}, "enabled": {"type": "boolean"}, "inputs": {"type": "array", "items": {"type": "string"}}}}}}}}}},
+          "401": {"$ref": "#/components/responses/Unauthorized"}, "403": {"$ref": "#/components/responses/Forbidden"}, "429": {"$ref": "#/components/responses/TooMany"}}
+      }
+    },
+    "/runs/{id}": {
+      "get": {
+        "operationId": "getRun", "summary": "Status of one of the person's runs", "x-scope": "workflows:read",
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "OK", "content": {"application/json": {"schema": {"type": "object", "properties": {"data": {"type": "object", "properties": {
+          "run_id": {"type": "string"}, "status": {"type": "string", "enum": ["queued", "running", "waiting_approval", "done", "failed", "cancelled"]}, "spent": {"type": "string"}, "max_credits": {"type": "string"}}}}}}}},
+          "401": {"$ref": "#/components/responses/Unauthorized"}, "403": {"$ref": "#/components/responses/Forbidden"}, "404": {"description": "No such run (or not the key's person's)."}, "429": {"$ref": "#/components/responses/TooMany"}}
+      }
+    },
+    "/workflows/{id}/run": {
+      "post": {
+        "operationId": "runWorkflow", "summary": "Start one of the person's enabled workflows", "x-scope": "workflows:run",
+        "description": "Steps that send something outside (email, calendar write) still wait for the person's approval; the key cannot give it.",
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "requestBody": {"content": {"application/json": {"schema": {"type": "object", "properties": {"inputs": {"type": "object", "additionalProperties": {"type": "string"}}, "dry_run": {"type": "boolean", "description": "Only check the inputs and that the workflow is on; nothing starts, nothing is charged."}}}}}},
+        "responses": {"202": {"description": "Queued", "content": {"application/json": {"schema": {"type": "object", "properties": {"data": {"type": "object", "properties": {"run_id": {"type": "string"}, "status": {"type": "string", "enum": ["queued"]}}}}}}}},
+          "401": {"$ref": "#/components/responses/Unauthorized"}, "403": {"$ref": "#/components/responses/Forbidden"}, "404": {"description": "No such workflow."},
+          "409": {"description": "The workflow is switched off."}, "422": {"description": "Missing, too long or malformed inputs."}, "429": {"description": "Already running, or too many requests."}}
+      }
+    }
+  }
+}

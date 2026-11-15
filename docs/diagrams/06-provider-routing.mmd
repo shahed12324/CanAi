@@ -1,0 +1,16 @@
+flowchart TD
+    S[Request: capability + routing mode<br/>auto / manual / cheapest / fastest / best / local] --> E[Eligible models<br/>plan allows · enabled · capability match · context fits]
+    E --> M{Mode}
+    M -- manual --> P1[User-selected model]
+    M -- cheapest --> P2[Sort by input+output price]
+    M -- fastest --> P3[Sort by p50 latency from health checks]
+    M -- best --> P4[Sort by admin quality rank]
+    M -- local --> P5[Ollama models only]
+    M -- auto --> P6[Admin routing rules<br/>task type → preferred model]
+    P1 & P2 & P3 & P4 & P5 & P6 --> H{Provider healthy?<br/>circuit breaker closed}
+    H -- yes --> CALL[Call provider<br/>timeout + retry policy]
+    H -- no --> FB[Next candidate / fallback provider]
+    CALL -- error / timeout --> FB
+    FB --> H
+    CALL -- ok --> U[Return + usage + cost]
+    FB -- none left --> ERR[Fail, release reserved credits]

@@ -1,0 +1,10 @@
+DROP FUNCTION IF EXISTS task_reminders_dispatch(integer);
+DROP FUNCTION IF EXISTS note_delete(char, char, char);
+DROP FUNCTION IF EXISTS note_save(char, char, char, text, text, boolean, boolean);
+DROP FUNCTION IF EXISTS task_clear_done(char, char);
+DROP FUNCTION IF EXISTS task_delete(char, char, char);
+DROP FUNCTION IF EXISTS task_set_done(char, char, char, boolean);
+DROP FUNCTION IF EXISTS task_edit(char, char, char, text, text, integer, date, timestamptz);
+DROP FUNCTION IF EXISTS task_add(char, char, char, text, text, integer, date, timestamptz);
+DROP TABLE IF EXISTS notes;
+DROP TABLE IF EXISTS tasks;

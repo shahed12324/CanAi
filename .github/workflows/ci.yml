@@ -1,0 +1,68 @@
+name: CI
+on:
+  push: {branches: [main]}
+  pull_request:
+
+jobs:
+  ai-engine:
+    runs-on: ubuntu-24.04
+    defaults: {run: {working-directory: apps/ai-engine}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - uses: shivammathur/setup-php@v2
+        with: {php-version: "8.4"}   # needed by the PHP<->Python signer compatibility test
+      - run: pip install -e '.[dev]'
+      - run: ruff check .
+      - run: mypy app
+      - run: pytest -q
+
+  database:
+    # Real PostgreSQL: tenant isolation (RLS), append-only, invitation flow, migration up/down.
+    runs-on: ubuntu-24.04
+    env:
+      JARVIS_TEST_PG_ADMIN_DSN: postgresql://postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      # Started by hand (not as a `services:` container) because the Phase 5 concurrency tests open 100+ connections
+      # and the default max_connections=100 is too low; a service container cannot take server arguments.
+      - name: Start PostgreSQL 18 with max_connections=300
+        run: |
+          docker run -d --name pg -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_HOST_AUTH_METHOD=trust postgres:18 -c max_connections=300
+          for i in $(seq 1 30); do docker exec pg pg_isready -U postgres && break; sleep 1; done
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: pip install pytest "psycopg[binary]"
+      - run: pytest -q tests/db
+
+  web:
+    # Active once apps/web exists (after scripts/bootstrap-web.sh is run and committed).
+    if: ${{ hashFiles('apps/web/artisan') != '' }}
+    runs-on: ubuntu-24.04
+    defaults: {run: {working-directory: apps/web}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with: {php-version: "8.4", extensions: "pdo_pgsql, redis, intl, mbstring, bcmath, gd, zip"}
+      - run: composer install --no-interaction --prefer-dist
+      - run: cp .env.example .env && php artisan key:generate
+      - run: ./vendor/bin/pint --test
+      - run: ./vendor/bin/phpstan analyse --memory-limit=512M
+      - run: ./vendor/bin/pest
+
+  mobile:
+    # Expo app: type check, API-client tests, and a real Android bundle (proves every screen compiles).
+    runs-on: ubuntu-24.04
+    defaults: {run: {working-directory: apps/mobile}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: "22", cache: npm, cache-dependency-path: apps/mobile/package-lock.json}
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npx expo export --platform android --output-dir /tmp/export
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: pip install pytest && pytest -q ../../tests/mobile   # app <-> Laravel route contract

@@ -1,0 +1,140 @@
+erDiagram
+    USERS ||--o{ TENANT_USERS : "member of"
+    TENANTS ||--o{ TENANT_USERS : has
+    TENANTS ||--o{ SUBSCRIPTIONS : has
+    PLANS ||--o{ SUBSCRIPTIONS : "subscribed as"
+    PLANS ||--o{ PLAN_FEATURES : defines
+    TENANTS ||--|| WALLETS : owns
+    WALLETS ||--o{ CREDIT_TRANSACTIONS : ledger
+    TENANTS ||--o{ USAGE_RECORDS : incurs
+    AI_PROVIDERS ||--o{ AI_MODELS : offers
+    AI_PROVIDERS ||--o{ PROVIDER_CREDENTIALS : "secured by"
+    AI_MODELS ||--o{ USAGE_RECORDS : "billed for"
+    TENANTS ||--o{ CONVERSATIONS : owns
+    USERS ||--o{ CONVERSATIONS : starts
+    CONVERSATIONS ||--o{ MESSAGES : contains
+    MESSAGES ||--o{ ATTACHMENTS : has
+    TENANTS ||--o{ AGENTS : employs
+    AGENTS ||--o{ AGENT_RUNS : executes
+    TENANTS ||--o{ WORKFLOWS : owns
+    WORKFLOWS ||--o{ WORKFLOW_VERSIONS : versions
+    WORKFLOW_VERSIONS ||--o{ WORKFLOW_RUNS : runs
+    WORKFLOW_RUNS ||--o{ APPROVALS : requests
+    TENANTS ||--o{ AUDIT_LOGS : records
+
+    USERS {
+        char26 id PK
+        text email UK
+        text password
+        timestamptz email_verified_at
+        bool is_platform_admin
+        text status
+    }
+    TENANTS {
+        char26 id PK
+        text name
+        text slug UK
+        text type "personal|organization"
+        char26 owner_id FK
+        text status
+    }
+    TENANT_USERS {
+        char26 tenant_id FK
+        char26 user_id FK
+        text status
+    }
+    PLANS {
+        char26 id PK
+        text code UK
+        bool is_lifetime_free
+        numeric monthly_price
+    }
+    SUBSCRIPTIONS {
+        char26 id PK
+        char26 tenant_id FK
+        char26 plan_id FK
+        text status
+        timestamptz current_period_end
+    }
+    WALLETS {
+        char26 id PK
+        char26 tenant_id FK
+        numeric balance
+        numeric reserved
+    }
+    CREDIT_TRANSACTIONS {
+        bigint id PK
+        char26 wallet_id FK
+        text type
+        numeric amount
+        text idempotency_key UK
+    }
+    AI_PROVIDERS {
+        char26 id PK
+        text adapter
+        text status
+    }
+    AI_MODELS {
+        char26 id PK
+        char26 provider_id FK
+        text model_key
+    }
+    CONVERSATIONS {
+        char26 id PK
+        char26 tenant_id FK
+        char26 user_id FK
+    }
+    MESSAGES {
+        char26 id PK
+        char26 conversation_id FK
+        text role
+    }
+    ATTACHMENTS {
+        char26 id PK
+        char26 message_id FK
+    }
+    AGENTS {
+        char26 id PK
+        char26 tenant_id FK
+    }
+    AGENT_RUNS {
+        char26 id PK
+        char26 agent_id FK
+    }
+    WORKFLOWS {
+        char26 id PK
+        char26 tenant_id FK
+    }
+    WORKFLOW_VERSIONS {
+        char26 id PK
+        char26 workflow_id FK
+        int version
+    }
+    WORKFLOW_RUNS {
+        char26 id PK
+        char26 workflow_version_id FK
+    }
+    APPROVALS {
+        char26 id PK
+        char26 tenant_id FK
+        text risk_class
+        text status
+    }
+    USAGE_RECORDS {
+        bigint id PK
+        char26 tenant_id FK
+        char26 model_id FK
+    }
+    PROVIDER_CREDENTIALS {
+        char26 id PK
+        char26 provider_id FK
+    }
+    PLAN_FEATURES {
+        char26 id PK
+        char26 plan_id FK
+        text feature_key
+    }
+    AUDIT_LOGS {
+        bigint id PK
+        char26 tenant_id FK
+    }

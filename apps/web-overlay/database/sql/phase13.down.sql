@@ -1,0 +1,15 @@
+DROP FUNCTION IF EXISTS inbox_message_status(bigint, text, text);
+DROP FUNCTION IF EXISTS inbox_mark_read(char);
+DROP FUNCTION IF EXISTS inbox_resolve(char, char, boolean);
+DROP FUNCTION IF EXISTS inbox_set_mode(char, char, text, text);
+DROP FUNCTION IF EXISTS inbox_send(char, char, text, text);
+DROP FUNCTION IF EXISTS inbox_receive(char, text, text);
+DROP FUNCTION IF EXISTS inbox_contact_verify(char, text, char);
+DROP FUNCTION IF EXISTS inbox_contact_ensure(char, text, text, char, char, char);
+DROP FUNCTION IF EXISTS inbox_channel_by_key(char);
+DROP FUNCTION IF EXISTS inbox_guard(char);
+DROP TABLE IF EXISTS inbox_messages;
+DROP TABLE IF EXISTS inbox_conversations;
+DROP TABLE IF EXISTS inbox_contacts;
+DROP TABLE IF EXISTS inbox_channels;
+DROP FUNCTION IF EXISTS inbox_origins_ok(text[]);

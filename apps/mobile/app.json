@@ -1,0 +1,63 @@
+{
+  "expo": {
+    "name": "CANAI",
+    "slug": "jarvis-one",
+    "scheme": [
+      "canai",
+      "jarvisone"
+    ],
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f172a"
+    },
+    "ios": {
+      "bundleIdentifier": "com.jarvisone.app",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Use Face ID to confirm approvals.",
+        "NSCameraUsageDescription": "CANAI uses the camera only to scan the QR code that connects this phone to your account."
+      }
+    },
+    "android": {
+      "package": "com.jarvisone.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0f172a"
+      },
+      "permissions": [
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT",
+        "POST_NOTIFICATIONS",
+        "CAMERA"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-local-authentication",
+      [
+        "expo-notifications",
+        {
+          "color": "#2563eb"
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "CANAI uses the camera only to scan the QR code that connects this phone to your account."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    }
+  }
+}

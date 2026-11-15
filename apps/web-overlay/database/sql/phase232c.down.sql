@@ -1,0 +1,12 @@
+DROP FUNCTION IF EXISTS social_comment_reply_fail(char, char, text);
+DROP FUNCTION IF EXISTS social_comment_reply_done(char, char, text);
+DROP FUNCTION IF EXISTS social_comment_reply_claim(integer);
+DROP FUNCTION IF EXISTS social_comment_ingest(char, char, char, text, text, text, timestamptz);
+DROP FUNCTION IF EXISTS social_comments_due(integer);
+DROP FUNCTION IF EXISTS social_comment_retry(char, char, char);
+DROP FUNCTION IF EXISTS social_comment_ignore(char, char, char);
+DROP FUNCTION IF EXISTS social_comment_withdraw(char, char, char);
+DROP FUNCTION IF EXISTS social_comment_approve(char, char, char, text);
+DROP FUNCTION IF EXISTS social_comment_draft(char, char, char, text);
+DROP TABLE IF EXISTS social_comments;
+ALTER TABLE social_posts DROP COLUMN IF EXISTS comments_checked_at;

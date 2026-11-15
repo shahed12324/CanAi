@@ -1,0 +1,9 @@
+flowchart LR
+    R[Request] --> A[1. Auth<br/>user resolved]
+    A --> B[2. Tenant Context Middleware<br/>active tenant from session/header<br/>must be in tenant_users]
+    B --> C[3. Policy / Gate<br/>spatie permission with team_id = tenant_id]
+    C --> D[4. Eloquent Global Scope<br/>WHERE tenant_id = ?]
+    D --> E[5. PostgreSQL RLS<br/>SET app.tenant_id per transaction]
+    E --> F[(Rows of this tenant only)]
+    B -- not a member --> X[403]
+    C -- no permission --> X

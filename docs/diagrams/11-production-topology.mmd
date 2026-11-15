@@ -1,0 +1,18 @@
+flowchart LR
+    I((Internet)) --> CF[DNS / optional CDN]
+    CF --> N[Nginx :443<br/>TLS Let's Encrypt]
+    subgraph VPS["VPS (docker network: jarvis_internal)"]
+        N --> APP[laravel php-fpm x N]
+        N --> RV[reverb]
+        APP --> PG[(postgres 18)]
+        APP --> RD[(redis 8)]
+        HZ[horizon workers] --> PG
+        HZ --> RD
+        SC[scheduler] --> HZ
+        APP --> AI[ai-engine]
+        HZ --> AI
+        RW[render worker<br/>ffmpeg] --> S3
+        CW[crawler worker<br/>playwright] --> RD
+    end
+    APP --> S3[(Object Storage)]
+    PG -. WAL + nightly dump .-> BK[(Encrypted offsite backup)]

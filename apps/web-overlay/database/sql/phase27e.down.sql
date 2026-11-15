@@ -1,0 +1,14 @@
+DROP FUNCTION IF EXISTS reseller_admin_overview();
+DROP FUNCTION IF EXISTS reseller_of(char, char);
+DROP FUNCTION IF EXISTS reseller_report(char, char);
+DROP FUNCTION IF EXISTS reseller_me(char, char);
+DROP FUNCTION IF EXISTS reseller_join(char, char, text);
+DROP FUNCTION IF EXISTS reseller_payout(char, char, text, bigint, text);
+DROP FUNCTION IF EXISTS reseller_update(char, text, integer);
+DROP FUNCTION IF EXISTS reseller_create(char, char, text, text, integer);
+ALTER TABLE tenants DROP CONSTRAINT IF EXISTS tenants_reseller_all;
+ALTER TABLE tenants DROP CONSTRAINT IF EXISTS tenants_reseller_fk;
+ALTER TABLE tenants DROP COLUMN IF EXISTS reseller_joined_at;
+ALTER TABLE tenants DROP COLUMN IF EXISTS reseller_bp;
+DROP TABLE IF EXISTS reseller_payouts;
+DROP TABLE IF EXISTS resellers;

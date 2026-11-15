@@ -1,0 +1,7 @@
+<label class="grid gap-1">Client name<input name="name" required maxlength="120" value="{{ $v['name'] ?? '' }}" class="rounded border px-2 py-1"></label>
+<div class="flex flex-wrap gap-3"><label class="grid gap-1">Primary color<input type="color" name="primary_color" value="{{ $v['primary_color'] ?? '#1f3a5f' }}"></label><label class="grid gap-1">Accent color<input type="color" name="accent_color" value="{{ $v['accent_color'] ?? '#e07a1f' }}"></label></div>
+<div class="grid gap-2 sm:grid-cols-2"><label class="grid gap-1">Email<input name="email" type="email" maxlength="120" value="{{ $v['email'] ?? '' }}" class="rounded border px-2 py-1"></label><label class="grid gap-1">Phone<input name="phone" maxlength="40" value="{{ $v['phone'] ?? '' }}" class="rounded border px-2 py-1"></label>
+<label class="grid gap-1">Website<input name="website" type="url" maxlength="200" value="{{ $v['website'] ?? '' }}" class="rounded border px-2 py-1"></label><label class="grid gap-1">Address<input name="address" maxlength="240" value="{{ $v['address'] ?? '' }}" class="rounded border px-2 py-1"></label></div>
+<label class="grid gap-1">Note (only for you)<textarea name="notes" rows="2" maxlength="500" class="rounded border px-2 py-1">{{ $v['notes'] ?? '' }}</textarea></label>
+<label class="grid gap-1">Logo (PNG/JPEG, up to 600 KB)<input type="file" name="logo" accept="image/png,image/jpeg"></label>
+@if (! empty($v['has_logo']))<label class="flex items-center gap-2"><input type="checkbox" name="remove_logo" value="1"> Delete current logo</label>@endif

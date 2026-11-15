@@ -1,0 +1,25 @@
+sequenceDiagram
+    autonumber
+    actor U as User
+    participant W as Web (Fortify session)
+    participant M as Mobile/Desktop
+    participant L as Laravel
+    participant DB as PostgreSQL
+
+    U->>W: email + password
+    W->>L: POST /login (rate limited)
+    L->>DB: verify hash, status, email_verified
+    alt 2FA enabled
+        L-->>W: 2FA challenge
+        U->>W: TOTP / recovery code
+        W->>L: POST /two-factor-challenge
+    end
+    L->>DB: create session, log login + device
+    L-->>W: session cookie (HttpOnly, Secure, SameSite=Lax)
+
+    U->>M: login
+    M->>L: POST /api/v1/auth/token (device_name)
+    L->>DB: verify + 2FA if enabled
+    L->>DB: store Sanctum token (hashed), abilities, device
+    L-->>M: plain token (once)
+    M->>M: store in secure storage<br/>(Keychain / Keystore / Tauri stronghold)

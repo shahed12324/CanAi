@@ -1,0 +1,12 @@
+DROP FUNCTION IF EXISTS wf_run_end(char, char, text, text);
+DROP FUNCTION IF EXISTS wf_step_record(char, char, text, text, text, text, numeric, jsonb, text);
+DROP FUNCTION IF EXISTS wf_due();
+DROP FUNCTION IF EXISTS wf_run_claim(integer);
+DROP FUNCTION IF EXISTS wf_run_cancel(char, char, char);
+DROP FUNCTION IF EXISTS wf_run_decide(char, char, char, boolean);
+DROP FUNCTION IF EXISTS wf_run_create(char, char, char, char, jsonb);
+DROP FUNCTION IF EXISTS wf_delete(char, char, char);
+DROP FUNCTION IF EXISTS wf_save(char, char, char, text, text, text, jsonb, boolean, time, numeric, boolean);
+DROP TABLE IF EXISTS wf_steps;
+DROP TABLE IF EXISTS wf_runs;
+DROP TABLE IF EXISTS wf_workflows;

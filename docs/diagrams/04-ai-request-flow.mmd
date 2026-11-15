@@ -1,0 +1,31 @@
+sequenceDiagram
+    autonumber
+    actor U as User
+    participant LW as Livewire Chat
+    participant L as Laravel
+    participant C as Credit Ledger
+    participant Q as Queue
+    participant P as Python Engine
+    participant AI as Provider
+    participant RV as Reverb
+
+    U->>LW: message + model choice
+    LW->>L: send()
+    L->>L: authorize (plan allows model? feature enabled?)
+    L->>C: reserve estimated credits (idempotency key)
+    alt insufficient credits
+        C-->>L: denied
+        L-->>LW: low balance + buy credits link
+    end
+    L->>Q: dispatch AiChatJob(request_id)
+    Q->>P: POST /internal/v1/chat (signed, tenant ctx, routing plan)
+    P->>AI: provider call (stream)
+    loop tokens
+        AI-->>P: chunk
+        P-->>L: stream relay / callback
+        L-->>RV: broadcast to private channel
+        RV-->>LW: render chunk
+    end
+    P-->>L: final usage (tokens in/out, provider, model, cost)
+    L->>C: settle (actual) and release unused reservation
+    L->>L: save message, usage_record, audit

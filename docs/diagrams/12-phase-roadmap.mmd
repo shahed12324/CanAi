@@ -1,0 +1,43 @@
+flowchart LR
+    subgraph A["A · Foundation"]
+        P0[0 Docs] --> P1[1 Dev env] --> P2[2 Auth + tenancy] --> P3[3 Super Admin]
+    end
+    subgraph B["B · AI Core"]
+        P4[4 Providers] --> P5[5 Credits] --> P6[6 AI engine + chat] --> P7[7 Telegram]
+    end
+    subgraph C["C · First revenue"]
+        P8[8 Lead extractor] --> P9[9 Proposal + email] --> P10[10 Payments] --> P11[11 Mobile v1]
+    end
+    subgraph D["D · E-commerce"]
+        P12[12 Stores] --> P13[13 Inbox] --> P14[14 Sales + delivery]
+    end
+    subgraph E["E · Finance"]
+        P15[15 Accounting] --> P16[16 Bill scan + bank] --> P17[17 VAT + tax] --> P18[18 Audit + payroll]
+    end
+    subgraph F["F · Intelligence"]
+        P19[19 Memory + RAG] --> P192[19.2 Productivity] --> P20[20 Voice] --> P21[21 Agents + workflows]
+    end
+    subgraph G["G · Marketing"]
+        P22[22 Creative studio] --> P23[23 Social] --> P24[24 Meta + Google Ads + SEO]
+    end
+    subgraph H["H · Desktop"]
+        P25[25 Desktop + avatar] --> P26[26 Computer control]
+    end
+    subgraph I["I · Launch"]
+        P27[27 White-label + dev platform] --> P28[28 Security + tests] --> P29[29 Production] --> P30[30 Launch]
+    end
+    P3 --> P4
+    P7 --> M1{{Milestone 1<br/>working AI platform}}
+    M1 --> P8
+    P9 --> M2{{Milestone 2<br/>owner finds clients}}
+    P11 --> M3{{Milestone 3<br/>sellable MVP}}
+    M3 --> P12
+    P14 --> M4{{Milestone 4}}
+    M4 --> P15
+    P18 --> M5{{Milestone 5}}
+    M5 --> P19
+    P21 --> P22
+    P24 --> M6{{Milestone 6}}
+    M6 --> P25
+    P26 --> P27
+    P30 --> M7{{Milestone 7<br/>commercial launch}}

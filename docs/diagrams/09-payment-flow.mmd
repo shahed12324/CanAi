@@ -1,0 +1,20 @@
+sequenceDiagram
+    autonumber
+    actor U as Customer
+    participant L as Laravel
+    participant G as Gateway<br/>(SSLCommerz / bKash / Nagad / Stripe)
+
+    U->>L: choose plan / credit package
+    L->>L: create invoice (pending) + payment intent (idempotent)
+    L->>G: init payment (amount, invoice ref, callback URLs)
+    G-->>U: hosted payment page
+    U->>G: pay
+    G-->>U: redirect to success URL
+    Note over L,U: redirect = display only, never trusted
+    G->>L: IPN / webhook (signature)
+    L->>L: verify signature
+    L->>G: server-side validate / query transaction
+    G-->>L: confirmed status + amount
+    L->>L: amount & currency match? not already processed?
+    L->>L: mark paid → activate subscription / credit grant (ledger)
+    L-->>U: receipt + notification
