@@ -9,6 +9,7 @@ on:
   workflow_dispatch:
   push:
     tags: ["v*"]
+    branches: ["installer-build"]   # build-only (no release is created: that job runs for tags only)
 
 permissions:
   contents: read
