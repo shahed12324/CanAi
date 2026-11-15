@@ -16,7 +16,7 @@ def act(c, kind, **params):
 
 
 def test_read_file_and_cut(root):
-    (root / "a.txt").write_text("হ্যালো\nworld", encoding="utf-8")
+    (root / "a.txt").write_bytes("হ্যালো\nworld".encode("utf-8"))  # bytes: no CRLF translation on Windows
     ok, out = act(cfg(root), "read_file", path=str(root / "a.txt"))
     assert ok and out == "হ্যালো\nworld"
     (root / "big.txt").write_text("x" * 50000)

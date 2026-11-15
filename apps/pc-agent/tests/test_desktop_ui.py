@@ -314,7 +314,7 @@ def test_voice_audio_bodies_get_a_bigger_but_bounded_limit(cwin):
     assert cwin.j("POST", "/api/cloud/voice/listen", big)[0] == 200
     try:                                       # the server may close the socket before the client finished sending the oversized body
         assert cwin.j("POST", "/api/cloud/voice/listen", {"audio_b64": "A" * 3_000_000})[0] == 413
-    except (BrokenPipeError, ConnectionResetError):
+    except ConnectionError:        # BrokenPipe/Reset (Linux) or Aborted (Windows)
         pass
     assert cwin.j("POST", "/api/cloud/chat", {"message": "x" * 100000})[0] == 413              # other cloud calls keep the small limit
 

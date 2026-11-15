@@ -1,3 +1,5 @@
+import sys
+
 import pytest
 
 from jarvis_agent import actions, devices, guard, inputctl, stop
@@ -156,7 +158,10 @@ def test_html_to_text_drops_scripts():
 def test_real_backend_refuses_cleanly_without_libs(root):
     devices.set_backends(None)
     ok, out = act(cfg(root), "screenshot", path=str(root / "s.png"))
-    assert not ok                                                                       # no display / no mss / not Windows: a refusal, never a crash
+    if sys.platform == "win32":
+        assert isinstance(ok, bool) and isinstance(out, str)       # a real Windows desktop may really take the picture; either way: never a crash
+    else:
+        assert not ok                                                                   # no display / no mss / not Windows: a refusal, never a crash
 
 
 def test_plan_engine_taints_browser_extract_and_requires_approval(root):

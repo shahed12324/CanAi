@@ -9,7 +9,15 @@ from jarvis_agent import actions, coords, devices, guard, inputctl, ocr, privacy
 from jarvis_agent.config import Config
 
 needs_ocr = pytest.mark.skipif(not ocr.available(), reason="tesseract is not installed")
-FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+def _font_path():
+    import os
+    for p in ("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", r"C:\Windows\Fonts\consola.ttf", r"C:\Windows\Fonts\arial.ttf"):
+        if os.path.exists(p):
+            return p
+    return "DejaVuSansMono.ttf"
+
+
+FONT = _font_path()
 
 
 def _png(im):

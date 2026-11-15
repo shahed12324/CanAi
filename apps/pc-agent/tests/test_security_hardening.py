@@ -284,6 +284,8 @@ def test_fuzzing_every_tool_never_raises_never_escapes_and_stays_fast(tmp_path):
             assert isinstance(res, tuple) and isinstance(res[0], bool) and isinstance(res[1], str), (kind, params)
         for junk in JUNK:
             res = actions.execute(cfg, {"kind": kind, "params": junk})                       # params that are not even an object
+            if junk == {} and kind == "window_info":                                         # needs no parameters: succeeds on a real desktop
+                continue
             assert res[0] is False, (kind, junk)
     for junk in JUNK:
         assert actions.execute(cfg, {"kind": junk, "params": {}})[0] is False

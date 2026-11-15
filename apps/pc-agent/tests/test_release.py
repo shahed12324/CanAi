@@ -17,7 +17,7 @@ def rc():
 
 def patched(rc, monkeypatch, path_part, fn):
     orig = rc.read
-    monkeypatch.setattr(rc, "read", lambda p: fn(orig(p)) if path_part in p else orig(p))
+    monkeypatch.setattr(rc, "read", lambda p: fn(orig(p).replace("\r\n", "\n")) if path_part in p else orig(p))
 
 
 def test_repo_is_consistent(rc):
