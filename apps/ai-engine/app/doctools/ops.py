@@ -401,8 +401,8 @@ def pdf_compress(data: bytes, level: str = "medium") -> bytes:
         for p in w.pages:
             p.compress_content_streams()
         try:
-            w.compress_identical_objects(remove_duplicates=True, remove_orphans=True)       # pypdf >= 6
-        except TypeError:
+            w.compress_identical_objects(remove_duplicates=True, remove_unreferenced=True)  # pypdf >= 6 (names changed in 7.0)
+        except Exception:  # noqa: BLE001  (TypeError or pypdf's DeprecationError, depending on the version)
             w.compress_identical_objects(remove_identicals=True, remove_orphans=True)       # older pypdf
         return _bytes(w)
     if level not in ("medium", "high"):
