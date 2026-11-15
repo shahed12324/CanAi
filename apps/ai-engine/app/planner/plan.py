@@ -139,7 +139,7 @@ def _intr(v: Any, where: str, lo: int, hi: int) -> int:
     return v
 
 
-def _browser_steps(params: dict, ctx: Ctx, sid: str) -> None:
+def _browser_steps(params: dict[str, Any], ctx: Ctx, sid: str) -> None:
     steps = params.get("steps")
     if not isinstance(steps, list) or not 1 <= len(steps) <= 20:
         raise PlanInvalid(f"step {sid}: steps must be a list of 1-20 browser operations")
@@ -174,7 +174,7 @@ def _browser_steps(params: dict, ctx: Ctx, sid: str) -> None:
         raise PlanInvalid(f"step {sid}: give 'url' or start with a goto operation")
 
 
-def _check_params(kind: str, params: dict, ctx: Ctx, sid: str) -> None:
+def _check_params(kind: str, params: dict[str, Any], ctx: Ctx, sid: str) -> None:
     w = f"step {sid}"
     if kind == "open_app":
         if not ctx.app_ok(_text(params["app"], f"{w}.app", 1, 120)):
@@ -231,7 +231,7 @@ def _check_params(kind: str, params: dict, ctx: Ctx, sid: str) -> None:
             _text(params["group_by"], f"{w}.group_by", 1, 100)
 
 
-def _check_verify(ver: Any, ctx: Ctx, sid: str) -> dict:
+def _check_verify(ver: Any, ctx: Ctx, sid: str) -> dict[str, Any]:
     w = f"step {sid}.verify"
     if not isinstance(ver, dict) or ver.get("type") not in VERIFY_TYPES:
         raise PlanInvalid(f"step {sid}: bad verify block")
@@ -247,7 +247,7 @@ def _check_verify(ver: Any, ctx: Ctx, sid: str) -> dict:
     return ver
 
 
-def validate_plan(plan: Any, roots: list[str], allowed: set[str], apps: list[str] | None = None, hosts: list[str] | None = None) -> dict:
+def validate_plan(plan: Any, roots: list[str], allowed: set[str], apps: list[str] | None = None, hosts: list[str] | None = None) -> dict[str, Any]:
     """Returns the cleaned plan (only known fields) or raises PlanInvalid with a reason the model can act on."""
     ctx = Ctx(roots, apps, hosts)
     if not isinstance(plan, dict) or not isinstance(plan.get("steps"), list):
@@ -255,7 +255,7 @@ def validate_plan(plan: Any, roots: list[str], allowed: set[str], apps: list[str
     steps = plan["steps"]
     if not 1 <= len(steps) <= MAX_STEPS:
         raise PlanInvalid(f"between 1 and {MAX_STEPS} steps are allowed")
-    out: list[dict] = []
+    out: list[dict[str, Any]] = []
     seen: set[str] = set()
     for i, s in enumerate(steps, 1):
         if not isinstance(s, dict):
@@ -315,7 +315,7 @@ def validate_plan(plan: Any, roots: list[str], allowed: set[str], apps: list[str
     return {"id": "t" + secrets.token_hex(6), "steps": out}  # the id is ours, never the model's
 
 
-def review(plan: dict) -> list[dict]:
+def review(plan: dict[str, Any]) -> list[dict[str, Any]]:
     """What the person is asked to approve: one line per step, with its risk and whether it needs its own approval."""
     rows = []
     for s in plan["steps"]:
@@ -349,7 +349,7 @@ DESCRIBE = {
 }
 
 
-def build_messages(goal: str, roots: list[str], allowed: set[str], feedback: str | None = None, apps: list[str] | None = None, hosts: list[str] | None = None) -> list[dict]:
+def build_messages(goal: str, roots: list[str], allowed: set[str], feedback: str | None = None, apps: list[str] | None = None, hosts: list[str] | None = None) -> list[dict[str, Any]]:
     kinds = {k: {"does": DESCRIBE.get(k, ""), "required": sorted(KINDS[k][1]), "optional": sorted(KINDS[k][2]), "risk": KINDS[k][0]} for k in sorted(allowed & set(KINDS))}
     system = (
         "You draft plans for a desktop computer assistant. Output ONLY one JSON object: "

@@ -186,9 +186,9 @@ def test_model_with_pricing_cannot_be_deleted(admin):
     p = mk_provider(admin, "p-del")
     m = mk_model(admin, p)
     admin.execute("INSERT INTO model_pricing (model_id) VALUES (%s)", (m,))
-    with pytest.raises(psycopg.errors.ForeignKeyViolation):
+    with pytest.raises((psycopg.errors.ForeignKeyViolation, psycopg.errors.RestrictViolation)):
         admin.execute("DELETE FROM ai_models WHERE id=%s", (m,))
-    with pytest.raises(psycopg.errors.ForeignKeyViolation):
+    with pytest.raises((psycopg.errors.ForeignKeyViolation, psycopg.errors.RestrictViolation)):
         admin.execute("DELETE FROM ai_providers WHERE id=%s", (p,))
 
 

@@ -66,7 +66,7 @@ final class FeatureController extends AdminController
                 AdminAudit::record('admin.feature.deleted', 'feature', $key, (array) $before);
             });
         } catch (QueryException $e) {
-            if ($e->getCode() === '23503') {   // foreign_key_violation: still used by a plan or override
+            if (in_array($e->getCode(), ['23503', '23001'], true)) {   // foreign_key_violation / restrict_violation (ON DELETE RESTRICT): still used by a plan or override
                 return back()->withErrors(['feature' => 'This feature is used in a plan or override; remove it from there first.']);
             }
             throw $e;

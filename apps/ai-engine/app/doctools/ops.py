@@ -37,7 +37,7 @@ def mm(v: float, dpi: int = DPI) -> int:
 # ─────────────────────────────────────────────────────────────── images
 def load(data: bytes) -> Image.Image:
     try:
-        im = Image.open(io.BytesIO(data))
+        im: Image.Image = Image.open(io.BytesIO(data))
         im.load()
     except Exception as e:  # noqa: BLE001
         raise ToolError("That file is not a readable image.") from e
@@ -471,7 +471,9 @@ def _pdf_out(pages: list[Image.Image]) -> Result:
 def run(op: str, files: list[tuple[str, bytes]], p: dict[str, Any]) -> Result:
     if len(files) > MAX_FILES:
         raise ToolError(f"At most {MAX_FILES} files at a time.")
-    f = lambda k, d=0.0: float(p.get(k, d) or d)  # noqa: E731
+    def f(k: str, d: float = 0.0) -> float:
+        return float(p.get(k, d) or d)
+
     paper = str(p.get("paper", "a4")).lower()
 
     handlers: dict[str, Callable[[], Result]] = {

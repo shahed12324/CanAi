@@ -122,7 +122,7 @@ def test_one_live_subscription_per_tenant(owner, world):
 
 def test_feature_in_use_cannot_be_deleted_and_plan_delete_cascades(admin):
     as_admin(admin)
-    with pytest.raises(psycopg.errors.ForeignKeyViolation):
+    with pytest.raises((psycopg.errors.ForeignKeyViolation, psycopg.errors.RestrictViolation)):
         admin.execute("DELETE FROM features WHERE key='module.chat'")
     admin.execute("INSERT INTO plans (id,code,name) VALUES (%s,'zz_tmp','T')", (ulid(),))
     pid = admin.execute("SELECT id FROM plans WHERE code='zz_tmp'").fetchone()[0]

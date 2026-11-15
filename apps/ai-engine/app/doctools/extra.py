@@ -133,7 +133,9 @@ def op_pdf_to_excel(files: Files, p: dict[str, Any]) -> Result:
     """Each page becomes a sheet; a line is split into cells wherever there are two or more spaces (works for ruled and spaced tables)."""
     r = ops._pdf(files[0][1])
     wb = Workbook()
-    wb.remove(wb.active)
+    first = wb.active
+    if first is not None:
+        wb.remove(first)
     rows_total = 0
     for n, pg in enumerate(r.pages, 1):
         ws = wb.create_sheet(f"Page {n}")

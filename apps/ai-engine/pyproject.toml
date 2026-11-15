@@ -61,5 +61,5 @@ python_version = "3.13"
 
 [[tool.mypy.overrides]]
 # No type stubs published for these (playwright is an optional extra, pypdfium2 ships no py.typed).
-module = ["playwright.*", "pypdfium2.*"]
+module = ["playwright.*", "pypdfium2.*", "qrcode.*", "barcode.*"]
 ignore_missing_imports = true
