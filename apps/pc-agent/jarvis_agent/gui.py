@@ -275,14 +275,25 @@ def make_handler(state: State, token: str, port_holder: list[int]):
                 return self._json(200, state.view())
             self._json(404, {"error": "not found"})
 
+        def _reject(self, status: int, body: dict) -> None:
+            """Answer an early refusal.  A small request body is read and thrown away first: on Windows, closing a socket that still holds
+            unread data makes the client see a connection reset instead of our answer."""
+            try:
+                n = int(self.headers.get("Content-Length") or 0)
+                if 0 < n <= 65536:
+                    self.rfile.read(n)
+            except (ValueError, OSError):
+                pass
+            self._json(status, body)
+
         def do_POST(self):
             if not self._host_ok():
-                return self._json(403, {"error": "host"})
+                return self._reject(403, {"error": "host"})
             if not self._authed():
-                return self._json(401, {"error": "token"})
+                return self._reject(401, {"error": "token"})
             origin = self.headers.get("Origin")
             if origin is not None and origin not in (f"http://127.0.0.1:{port_holder[0]}", f"http://localhost:{port_holder[0]}"):
-                return self._json(403, {"error": "origin"})
+                return self._reject(403, {"error": "origin"})
             n = int(self.headers.get("Content-Length") or 0)
             if n > (MAX_VOICE_BODY if self.path.startswith("/api/cloud/voice/") else MAX_CLOUD_BODY if self.path.startswith("/api/cloud/") else MAX_BODY):
                 return self._json(413, {"error": "too large"})
